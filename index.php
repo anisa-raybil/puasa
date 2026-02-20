@@ -1,0 +1,492 @@
+<?php
+// =====================================================
+// 1. KONFIGURASI TANGGAL
+// =====================================================
+ $tanggal_mulai = new DateTime('2025-02-19');
+ $hari_ini = date('Y-m-d');
+ $nama_hari = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+ $nama_bulan = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+?>
+
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ramadhan Planner 1446 H</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        quicksand: ['Quicksand', 'sans-serif'],
+                    },
+                    colors: {
+                        // Soft Blue Palette
+                        'sky-pale': '#F0F9FF',
+                        'sky-light': '#E0F2FE',
+                        'sky-medium': '#BAE6FD',
+                        'sky-accent': '#7DD3FC',
+                        'ocean': '#38BDF8',
+                        'deep-blue': '#0EA5E9',
+                        'soft-indigo': '#A5B4FC', // Sedang sentuhan ungu muda
+                        'slate-blue': '#475569',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            font-family: 'Quicksand', sans-serif;
+            -webkit-tap-highlight-color: transparent; /* Hilangkan highlight biru saat tap di HP */
+        }
+        
+        /* Custom Scrollbar Soft Blue */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #F0F9FF; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #7DD3FC, #BAE6FD); border-radius: 10px; }
+        
+        .task-done { 
+            text-decoration: line-through; 
+            opacity: 0.5; 
+        }
+        
+        /* Animasi Lembut */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+        }
+        
+        .float-animation { animation: float 4s ease-in-out infinite; }
+        
+        /* Gradient Background seperti langit */
+        body {
+            background: linear-gradient(180deg, #FFFFFF 0%, #E0F2FE 100%);
+            background-attachment: fixed;
+        }
+
+        .cute-shadow {
+            box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.2), 0 8px 10px -6px rgba(56, 189, 248, 0.1);
+        }
+        
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(56, 189, 248, 0.25);
+        }
+
+        /* Custom Checkbox Blue */
+        .checkbox-cute {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid #7DD3FC;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0; /* Penting untuk flex di HP */
+        }
+        
+        .checkbox-cute:checked {
+            background: linear-gradient(135deg, #38BDF8, #0EA5E9);
+            border-color: #0EA5E9;
+        }
+        
+        .checkbox-cute:checked::after {
+            content: '✔';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Tombol tanggal responsive */
+        .day-btn {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .day-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Progress Bar Blue Gradient */
+        .progress-bar-cute {
+            background: linear-gradient(90deg, #7DD3FC, #38BDF8, #0EA5E9);
+            background-size: 200% 200%;
+            animation: gradient-shift 3s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Awang-awang dekoratif */
+        .cloud-shape {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.6;
+            filter: blur(20px);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-700 relative overflow-x-hidden">
+
+    <!-- Decorative Background Clouds -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="cloud-shape w-40 h-20 top-10 left-10 float-animation"></div>
+        <div class="cloud-shape w-60 h-24 top-1/4 right-0 float-animation" style="animation-delay: 2s;"></div>
+        <div class="cloud-shape w-48 h-20 bottom-20 left-1/4 float-animation" style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- ================== SIDEBAR: NAVIGASI TANGGAL ================== -->
+    <!-- Di HP: Sidebar jadi header/top bar, di Desktop: sidebar kiri -->
+    <aside class="relative z-10 w-full md:w-80 md:fixed md:left-0 md:top-0 md:h-screen bg-white/70 backdrop-blur-xl border-b md:border-r border-sky-medium/30 overflow-y-auto">
+        <div class="p-5 md:p-6">
+            <!-- Header -->
+            <div class="text-center md:text-left mb-4">
+                <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
+                    <span class="text-3xl">☁️</span>
+                    <h1 class="text-xl font-extrabold text-deep-blue">Ramadhan Planner</h1>
+                </div>
+                <p class="text-sky-accent text-xs font-semibold tracking-wide">1446 H • SEMANGAT!</p>
+            </div>
+
+            <!-- Progress Ring (Hanya tampil di mode mobile di atas grid, atau di desktop di sidebar) -->
+            <div class="flex justify-center my-4">
+                 <div class="flex items-center gap-4 bg-sky-pale/80 rounded-2xl p-3 w-full md:w-auto justify-center shadow-sm">
+                    <div class="relative w-14 h-14">
+                        <svg class="w-14 h-14 transform -rotate-90">
+                            <circle cx="28" cy="28" r="24" stroke="#E0F2FE" stroke-width="5" fill="none"/>
+                            <circle id="progress-ring" cx="28" cy="28" r="24" stroke="#38BDF8" stroke-width="5" fill="none" 
+                                    stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="150.8"/>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="progress-ring-text" class="text-sm font-bold text-deep-blue">0%</span>
+                        </div>
+                    </div>
+                    <div class="text-left hidden md:block">
+                        <p class="text-xs text-slate-500 font-medium">Progress</p>
+                        <p class="text-sm font-bold text-slate-700">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Tanggal -->
+            <div class="grid grid-cols-6 md:grid-cols-5 gap-1.5 md:gap-2 mb-4">
+                <?php for($i = 1; $i <= 30; $i++):
+                    $tgl = clone $tanggal_mulai;
+                    $tgl->modify("+".($i-1)." days");
+                    $is_today = ($tgl->format('Y-m-d') == $hari_ini);
+                    
+                    // Variasi warna biru
+                    $colors = ['bg-sky-light', 'bg-sky-medium/60', 'bg-sky-accent/30', 'bg-soft-indigo/20', 'bg-sky-pale'];
+                    $color_class = $colors[($i - 1) % 5];
+                ?>
+                <button onclick="selectDay(<?= $i ?>)" id="btn-day-<?= $i ?>" 
+                        class="day-btn aspect-square rounded-xl flex flex-col items-center justify-center font-bold relative
+                        <?= $is_today ? 'bg-deep-blue text-white shadow-md scale-105 ring-2 ring-deep-blue/50' : $color_class . ' text-slate-blue hover:bg-sky-accent/40' ?>">
+                    <span class="text-[8px] md:text-[10px] opacity-80 font-semibold"><?= $tgl->format('d') ?></span>
+                    <span class="text-sm md:text-base"><?= $i ?></span>
+                    <?php if($is_today): ?>
+                    <span class="absolute -top-1 -right-1 text-[10px]">⭐</span>
+                    <?php endif; ?>
+                </button>
+                <?php endfor; ?>
+            </div>
+
+            <!-- Quote -->
+            <div class="hidden md:block bg-sky-light/50 rounded-xl p-3 border border-sky-medium/20">
+                <p class="text-[11px] text-slate-500 italic text-center leading-relaxed">
+                    "Dan tolong-menolonglah kamu dalam (mengerjakan) kebajikan dan takwa..." <br>
+                    <span class="font-bold text-deep-blue text-[10px]">(QS. Al-Maidah: 2)</span>
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ================== MAIN CONTENT: PLANNER ================== -->
+    <main class="flex-1 relative z-10 p-4 md:p-8 md:ml-80 min-h-screen">
+        
+        <!-- Header Konten -->
+        <div class="mb-5 md:mb-8">
+            <div class="flex items-center gap-3">
+                <div class="bg-sky-light p-2 rounded-xl shadow-sm">
+                    <span class="text-2xl md:text-3xl">📖</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800" id="header-hari">Hari ke-1</h2>
+                    <p class="text-sky-accent font-medium text-sm md:text-base" id="header-tanggal">19 Februari 2025</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar Utama -->
+        <div class="mb-5 bg-white/80 p-4 rounded-2xl cute-shadow border border-sky-light">
+            <div class="flex justify-between mb-2 items-center">
+                <span class="text-xs md:text-sm text-slate-600 font-semibold">Target Hari Ini</span>
+                <span id="progress-percent" class="text-sm md:text-lg font-extrabold text-deep-blue">0%</span>
+            </div>
+            <div class="w-full bg-sky-pale rounded-full h-3 overflow-hidden">
+                <div id="progress-bar" class="progress-bar-cute h-3 rounded-full transition-all duration-500 relative" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
+            
+            <!-- Kolom Kiri: Checklist Rutin -->
+            <div class="bg-white/80 backdrop-blur-sm p-4 md:p-6 rounded-2xl cute-shadow border border-sky-light/50 card-hover">
+                <h3 class="text-base md:text-lg font-bold mb-3 flex items-center gap-2 text-slate-700">
+                    <span class="text-lg md:text-xl">🧊</span> Aktivitas Rutin
+                </h3>
+                <div id="routine-list" class="space-y-2">
+                    <!-- JS Content -->
+                </div>
+            </div>
+
+            <!-- Kolom Kanan: Target & Notes -->
+            <div class="space-y-5">
+                <!-- Target Pribadi -->
+                <div class="bg-white/80 backdrop-blur-sm p-4 md:p-6 rounded-2xl cute-shadow border border-soft-indigo/20 card-hover">
+                    <h3 class="text-base md:text-lg font-bold mb-3 flex items-center gap-2 text-slate-700">
+                        <span class="text-lg md:text-xl">🎯</span> Target Harian
+                    </h3>
+                    
+                    <!-- Form Tambah -->
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="new-task-input" placeholder="Tambah target..." 
+                               class="flex-1 bg-sky-pale/50 border border-sky-medium/40 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700 focus:border-deep-blue focus:bg-white transition-all placeholder:text-sky-accent">
+                        <button onclick="addCustomTask()" 
+                                class="bg-deep-blue hover:bg-sky-accent px-4 py-2 rounded-xl text-white font-bold transition-all active:scale-90 shadow-sm">
+                            <span class="text-lg">+</span>
+                        </button>
+                    </div>
+
+                    <div id="custom-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- JS Content -->
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="bg-white/80 backdrop-blur-sm p-4 md:p-6 rounded-2xl cute-shadow border border-sky-light/50 card-hover">
+                    <h3 class="text-base md:text-lg font-bold mb-3 flex items-center gap-2 text-slate-700">
+                        <span class="text-lg md:text-xl">📝</span> Catatan
+                    </h3>
+                    <textarea id="daily-notes" onkeyup="saveData()" 
+                              class="w-full h-28 md:h-32 bg-sky-pale/30 border border-sky-medium/40 rounded-xl p-3 text-sm text-slate-700 focus:border-deep-blue transition-all resize-none font-medium placeholder:text-sky-accent"
+                              placeholder="Tulis renungan atau hal penting..."></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center text-xs text-sky-accent font-medium opacity-80">
+            Dibuat oleh Anisa • Ramadhan 1446 H
+        </div>
+    </main>
+
+    <!-- ================== JAVASCRIPT LOGIC ================== -->
+    <script>
+        // Data Default
+        const defaultRoutine = [
+            { id: 'r1', text: 'Sahur & Niat Puasa', emoji: '🥣', checked: false },
+            { id: 'r2', text: 'Sholat Subuh Berjamaah', emoji: '🕌', checked: false },
+            { id: 'r3', text: 'Tadarus Al-Quran', emoji: '📖', checked: false },
+            { id: 'r4', text: 'Sholat Dhuha', emoji: '🌤️', checked: false },
+            { id: 'r5', text: 'Sholat 5 Waktu', emoji: '🧎', checked: false },
+            { id: 'r6', text: 'Sholat Tarawih', emoji: '🌙', checked: false },
+            { id: 'r7', text: 'Baca Asmaul Husna', emoji: '🤲', checked: false },
+            { id: 'r8', text: 'Sedekah Hari Ini', emoji: '💝', checked: false }
+        ];
+
+        let plannerData = JSON.parse(localStorage.getItem('ramadhanPlanner')) || {};
+        let activeDay = 1;
+
+        function init() {
+            const startDate = new Date('2025-02-19');
+            const today = new Date();
+            const diffTime = today - startDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays >= 1 && diffDays <= 30) {
+                selectDay(diffDays);
+            } else {
+                selectDay(1);
+            }
+        }
+
+        function selectDay(day) {
+            activeDay = day;
+            
+            if (!plannerData[day]) {
+                plannerData[day] = {
+                    routine: JSON.parse(JSON.stringify(defaultRoutine)),
+                    custom: [],
+                    notes: ""
+                };
+            }
+
+            updateHeader();
+            renderRoutine();
+            renderCustom();
+            renderNotes();
+            updateProgress();
+            updateSidebarUI();
+        }
+
+        function renderRoutine() {
+            const container = document.getElementById('routine-list');
+            const data = plannerData[activeDay].routine;
+            
+            container.innerHTML = data.map((item, index) => `
+                <label class="flex items-center gap-3 p-2.5 rounded-xl cursor-pointer hover:bg-sky-pale/50 transition-all ${item.checked ? 'task-done bg-sky-light/30' : 'bg-sky-pale/30'}">
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleRoutine(${index})" class="checkbox-cute">
+                    <span class="text-base">${item.emoji}</span>
+                    <span class="text-slate-700 font-medium text-sm flex-1">${item.text}</span>
+                    ${item.checked ? '<span class="text-xs text-deep-blue font-bold">Done</span>' : ''}
+                </label>
+            `).join('');
+        }
+
+        function renderCustom() {
+            const container = document.getElementById('custom-list');
+            const data = plannerData[activeDay].custom;
+            
+            if(data.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <span class="text-2xl block mb-1 opacity-70">🌈</span>
+                        <p class="text-slate-400 text-xs font-medium">Belum ada target</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = data.map((item, index) => `
+                <div class="flex items-center gap-2 group">
+                    <label class="flex-1 flex items-center gap-3 p-2.5 rounded-xl cursor-pointer hover:bg-sky-pale/50 transition-all ${item.checked ? 'task-done bg-sky-light/30' : 'bg-soft-indigo/10'}">
+                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCustom(${index})" class="checkbox-cute" style="border-color: #A5B4FC;">
+                        <span class="text-sm font-medium text-slate-700">${item.text}</span>
+                    </label>
+                    <button onclick="deleteCustom(${index})" 
+                            class="text-red-400 opacity-0 group-hover:opacity-100 transition-all p-1.5 hover:bg-red-50 rounded-lg active:scale-90">
+                        <span class="text-sm">🗑️</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderNotes() {
+            const el = document.getElementById('daily-notes');
+            el.value = plannerData[activeDay].notes;
+        }
+
+        function updateHeader() {
+            const start = new Date('2025-02-19');
+            const current = new Date(start);
+            current.setDate(start.getDate() + activeDay - 1);
+            
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            
+            const dayName = days[current.getDay()];
+            const formatted = `${dayName}, ${current.getDate()} ${months[current.getMonth()]}`;
+
+            document.getElementById('header-hari').innerText = `Hari ke-${activeDay}`;
+            document.getElementById('header-tanggal').innerText = formatted;
+        }
+
+        function toggleRoutine(index) {
+            plannerData[activeDay].routine[index].checked = !plannerData[activeDay].routine[index].checked;
+            saveData();
+            renderRoutine();
+            updateProgress();
+        }
+
+        function addCustomTask() {
+            const input = document.getElementById('new-task-input');
+            if(input.value.trim() === "") return;
+            
+            plannerData[activeDay].custom.push({ text: input.value, checked: false });
+            input.value = "";
+            saveData();
+            renderCustom();
+            updateProgress();
+        }
+
+        function toggleCustom(index) {
+            plannerData[activeDay].custom[index].checked = !plannerData[activeDay].custom[index].checked;
+            saveData();
+            renderCustom();
+            updateProgress();
+        }
+
+        function deleteCustom(index) {
+            plannerData[activeDay].custom.splice(index, 1);
+            saveData();
+            renderCustom();
+            updateProgress();
+        }
+
+        function saveData() {
+            plannerData[activeDay].notes = document.getElementById('daily-notes').value;
+            localStorage.setItem('ramadhanPlanner', JSON.stringify(plannerData));
+        }
+
+        function updateProgress() {
+            const rData = plannerData[activeDay].routine;
+            const cData = plannerData[activeDay].custom;
+            
+            let totalItems = rData.length + cData.length;
+            let checkedItems = rData.filter(i => i.checked).length + cData.filter(i => i.checked).length;
+            
+            let percent = totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
+            
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-percent').innerText = percent + '%';
+            
+            // Update Ring (sidebar)
+            const circumference = 150.8; // 2 * pi * 24
+            const offset = circumference - (percent / 100) * circumference;
+            document.getElementById('progress-ring').style.strokeDashoffset = offset;
+            document.getElementById('progress-ring-text').innerText = percent + '%';
+        }
+
+        function updateSidebarUI() {
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                btn.classList.remove('active', 'scale-110');
+            });
+            
+            const activeBtn = document.getElementById('btn-day-' + activeDay);
+            if(activeBtn) {
+                activeBtn.classList.add('active', 'scale-110');
+            }
+        }
+
+        // Enter key support
+        document.getElementById('new-task-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addCustomTask();
+        });
+
+        init();
+    </script>
+</body>
+</html>
